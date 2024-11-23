@@ -1,84 +1,83 @@
 import java.util.Scanner;
-
+ //sumar
 public class Main {
+     /*public static void main(String[] args) {
 
-    public static void main(String[] args) {
-        // TODO code application logic here
+         int suma = 0;
+         for (int i = 1; i <= 100; i++) {
+             suma+= i;
+         }
+         System.out.println("La suma es: " + suma);
+     }
 
-        Scanner entrada = new Scanner(System.in);
-        String nombre_registrado= "", apellido_registrado ="", email_registrado = "",
-                dni_registrado= "", fecha_registrada= "", contraseña_registrada1="",
-                contraseña_registrada2= "", respuesta_seguridad =" ";
-        int opcion;
-        do {
-            System.out.println("========== Menu de inicio ========== \n" +
-                    "\t 1. Login\n" +
-                    "\t 2. Registro\n" +
-                    "\t 3. Recuperacion de Contraseña \n" +
-                    "\t 4. Salir \n");
-            opcion = entrada.nextInt();
-            switch (opcion) {
-                case 1:
-                    System.out.println("Has seleccionado Login");
-                    System.out.println("Ingresa tu nombre de usuario:");
-                    Scanner nombre = new Scanner(System.in);
-                    String nombre_usuario = nombre.nextLine();
-                    System.out.println("Ingresa tu contraseña:");
-                    Scanner contraseña = new Scanner(System.in);
-                    String contraseña_usuario = contraseña.nextLine();
-
-                    if (nombre_usuario.equals(nombre_registrado) && contraseña_usuario.equals(contraseña_registrada1)) {
-                        System.out.println("Login Correcto." + "\n ¡Bienvenido " + nombre_usuario + "!\n");
-                    } else {
-                        System.out.println("Nombre de usuario o contraseña incorrectos.");
-                    }
-
-                    break;
-
-
-                case 2:
-                    System.out.println("========== Has seleccionado Registro ========== ");
-                    System.out.println("Introduce tu nombre:");
-                    Scanner escaner_nombre = new Scanner(System.in);
-                    nombre_registrado = escaner_nombre.nextLine();
-                    System.out.println("Introduce tu Apellido:");
-                    Scanner escaner_apellido = new Scanner(System.in);
-                    apellido_registrado = escaner_apellido.nextLine();
-                    System.out.println("Introduce tu email:");
-                    Scanner escaner_email = new Scanner(System.in);
-                    email_registrado = escaner_email.nextLine();
-                    System.out.println("Introduce tu DNI:");
-                    Scanner escaner_dni = new Scanner(System.in);
-                    dni_registrado = escaner_dni.nextLine();
-                    System.out.println("Introduce tu Fecha de Nacimiento:");
-                    Scanner escaner_fecha_nacimiento = new Scanner(System.in);
-                    fecha_registrada = escaner_fecha_nacimiento.nextLine();
-                    System.out.println("Introduce una Contraseña:");
-                    Scanner escaner_contraseña1 = new Scanner(System.in);
-                    contraseña_registrada1 = escaner_contraseña1.nextLine();
-                    System.out.println("Repite la Contraseña:");
-                    Scanner escaner_contraseña2 = new Scanner(System.in);
-                    contraseña_registrada2 = escaner_contraseña2.nextLine();
-                    System.out.println("Para tu seguridad se te va a hacer una pregunta a modo de recuperacion de contraseña:" +
-                            " ¿Cual es tu color favorito?");
-                    Scanner escaner_respuesta_seguridad = new Scanner(System.in);
-                    respuesta_seguridad = escaner_respuesta_seguridad.nextLine();
-
-
-
-                    break;
-                case 3:
-                    System.out.println("Has seleccionado Recuperacion de Contraseña");
-                    break;
-                case 4:
-                    System.out.println("Has seleccionado Salir");
-                    break;
-                default:
-                    System.out.println("Opcion no valida");
-            }
-
-        } while (opcion != 4);
-
-
+ }
+      *//*
+    // tabla de Multiplicar
+public static void main(String[] args) {
+    for (int i = 1; i <= 10; i++) {
+        System.out.println("5 X " + i + " = " + (5 * i));
     }
 }
+}*/
+/*
+public static void main(String[] args) {
+    calcular_area(5,10);
+    calcular_area(3.5, 7.2);
+}
+public static void calcular_area(double base, double altura){
+
+    System.out.println(base*altura );
+}
+
+}
+
+ */
+    /*
+    public static void main(String[] args) {
+
+        compararNumeros(5,7);
+        compararNumeros(7,7);
+        compararNumeros(8,2);
+
+    }
+    public static void compararNumeros (int num1, int num2){
+        if ( num1 == num2) {
+            System.out.println("Num1 es igual a num 2");
+        } else if  ( num1 > num2 ) {
+            System.out.println("numero 1 es mayor a numero 2");
+        } else {
+            System.out.println("numero 1 es menor que 2");
+        }
+    }
+ }
+ */
+     /*
+ public static void main (String[] arg) {
+     calcularDescuento(150,20);
+ }
+    public static void  calcularDescuento (double precio_original, int descuento){
+     double precioFinal = precio_original - (precio_original * descuento/100);
+     System.out.println("precio final es:" + precioFinal);
+    }
+ }
+
+      */
+
+     public static void main(String[] args) {
+         for (int i = 1; i <= 5; i++) {
+             // Imprimir espacios para centrar la pirámide
+             for (int j = 5; j > i; j--) {
+                 System.out.print(" ");
+             }
+             // Imprimir números en cada nivel de la pirámide
+             for (int k = 1; k <= i; k++) {
+                 System.out.print(i + " ");
+             }
+             System.out.println();
+         }
+     }
+ }
+
+      
+
+

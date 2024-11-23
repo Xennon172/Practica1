@@ -1,5 +1,4 @@
-/* package Practica;
-
+package final1eva;
 import java.util.Scanner;
 
 public class Main {
@@ -15,7 +14,7 @@ public class Main {
     public static boolean captcha_valido = false;
 
     public static void main(String[] args) {
-        //menu();
+        menu();
         fecha_valida();
     }
 
@@ -30,7 +29,7 @@ public class Main {
             System.out.println("=====================================");
             System.out.println("     1. Login");
             System.out.println("     2. Registro");
-            System.out.println("     3. Recuperación de Contraseña");
+            System.out.println("     3. Recuperación de Contraseña"   );
             System.out.println("     4. Salir");
             System.out.println("=====================================");
             System.out.print("\n\tSelecciona una opción: ");
@@ -62,6 +61,8 @@ public class Main {
 
     public static void login() {
         Scanner datos = new Scanner(System.in);
+
+
         if (nombre_registrado == null || contrasena_registrada1 == null) {
             System.out.println("\f No hay usuario registrado. Regístrate primero." + "\n\f Escoge la Opción 2");
             return;
@@ -120,6 +121,7 @@ public class Main {
     }
 
     public static void registro() {
+
         comprobar_bloqueo();
         boolean registro_correcto = false;
         do {
@@ -216,7 +218,7 @@ public class Main {
                 intentos_captcha++;
             }
 
-        } while (!captcha_valido || intentos_captcha < 3);
+        } while (!captcha_valido || intentos_captcha > 3);
 
         if (captcha_valido) {
             return true;
@@ -354,7 +356,7 @@ public class Main {
                     case 7:
                     case 8:
                     case 10:
-                    case 12:
+                    case 12 :
                         dias_mes = 31;
                         break;
                     case 4:
@@ -394,7 +396,3 @@ public class Main {
         } while (!validar_fecha);
     }
 }
-
- */
-
-
