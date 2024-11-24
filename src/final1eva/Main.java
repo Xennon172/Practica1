@@ -16,6 +16,7 @@ public class Main {
     public static void main(String[] args) {
         menu();
         fecha_valida();
+
     }
 
 
@@ -180,7 +181,7 @@ public class Main {
     public static void recuperacion() {
 
         if (nombre_registrado == null || contrasena_registrada1 == null) {
-            System.out.println("\t ¡¡ME LO QUERIAS REVENTAR EEEHHH, LISTO!!.\n" + " \t Anda... Regístrate Primero.\n" + "\t Pulsa el numero 2 de tu teclado.");
+            System.out.println("\t ¡¡ME LO QUERIAS REVENTAR EEEHHH, LISTO!!." + " \t Anda... Regístrate Primero.\n" + "\t Pulsa el numero 2 de tu teclado.");
             return;
         }
         System.out.println("=====================================");
@@ -257,30 +258,31 @@ public class Main {
         return true;
     }
 
-    public static boolean validar_conntrasena(String contrasena) {
+    public static boolean validar_contrasena(String contrasena) {
+
         if (contrasena.length() < 8) {
             return false;
         }
 
-        boolean tieneMayuscula = false;
-        boolean tieneMinuscula = false;
-        boolean tieneNumero = false;
-        boolean tieneEspecial = false;
+        boolean tiene_mayuscula = false;
+        boolean tiene_minuscula = false;
+        boolean tiene_numero = false;
+        boolean tiene_especial = false;
 
         for (int i = 0; i < contrasena.length(); i++) {
             char c = contrasena.charAt(i);
 
             if (c >= 'A' && c <= 'Z') {
-                tieneMayuscula = true;
+                tiene_mayuscula = true;
             } else if (c >= 'a' && c <= 'z') {
-                tieneMinuscula = true;
+                tiene_minuscula = true;
             } else if (c >= '0' && c <= '9') {
-                tieneNumero = true;
+                tiene_numero = true;
             } else {
-                tieneEspecial = true;
+                tiene_especial = true;
             }
 
-            if (tieneMayuscula && tieneMinuscula && tieneNumero && tieneEspecial) {
+            if (tiene_mayuscula && tiene_minuscula && tiene_numero && tiene_especial) {
                 return true;
             }
 
