@@ -1,24 +1,19 @@
 package final1eva;
+
 import java.util.Scanner;
 
 public class Main {
 
     // Variables globales, se declaran estáticas para que otros métodos o clases puedan acceder a ellas.
-
     static String usuario_registrado, nombre_registrado, apellido_registrado, email_registrado,
-            dni_registrado, fecha_registrada, contrasena_registrada1,
-            contrasena_registrada2, respuesta_seguridad1, respuesta_seguridad2;
+            dni_registrado, fecha_registrada, contrasena_registrada1, respuesta_seguridad;
 
     static boolean bloqueado = false;
-
-    public static boolean captcha_valido = false;
+    static boolean registrado = false;
 
     public static void main(String[] args) {
         menu();
-        fecha_valida();
-
     }
-
 
     public static void menu() {
         Scanner entrada = new Scanner(System.in);
@@ -30,8 +25,9 @@ public class Main {
             System.out.println("=====================================");
             System.out.println("     1. Login");
             System.out.println("     2. Registro");
-            System.out.println("     3. Recuperación de Contraseña"   );
-            System.out.println("     4. Salir");
+            System.out.println("     3. Recuperación de Contraseña");
+            System.out.println("     4. Desbloqueo de usuario");
+            System.out.println("     5. Salir");
             System.out.println("=====================================");
             System.out.print("\n\tSelecciona una opción: ");
 
@@ -45,356 +41,519 @@ public class Main {
                     registro();
                     break;
                 case "3":
-                    recuperacion();
+                    recuperacion(true);
                     break;
                 case "4":
+                    recuperacion(false);
+                    break;
+                case "5":
                     System.out.println("=====================================");
                     System.out.println("=            ADIOSITO               =");
                     System.out.println("=====================================");
-
                     break;
                 default:
-                    System.out.println("Opcion no valida. Selecciona del 1 al 4.");
+                    System.out.println("Opcion no valida. Selecciona del 1 al 5.");
             }
 
-        } while (!seleccion.equals("4"));
+        } while (!seleccion.equals("5"));
+        System.exit(0);
     }
 
     public static void login() {
-        Scanner datos = new Scanner(System.in);
-
-
-        if (nombre_registrado == null || contrasena_registrada1 == null) {
-            System.out.println("\f No hay usuario registrado. Regístrate primero." + "\n\f Escoge la Opción 2");
-            return;
-        }
-
+        Scanner entrada = new Scanner(System.in);
+        String seleccion;
+        int captcha_generado;
+        String captcha_usuario;
+        int intentos_captcha = 0;
         int intentos_login = 0;
-        boolean logincorrecto = false;
-        // Utilizar Do-While en los menus
+        boolean login_correcto = false;
 
+        if (!registrado) {
+            System.out.println("No hay usuarios registrados");
+
+            do {
+                System.out.println("=====================================");
+                System.out.println("=       Selecciona una opción       =");
+                System.out.println("=====================================");
+                System.out.println("     1. ¿Ir a registro?");
+                System.out.println("     2. Volver a menú");
+                System.out.println("=====================================");
+                System.out.print("\n\tSelecciona una opción: ");
+
+                seleccion = entrada.nextLine().trim();
+
+                switch (seleccion) {
+                    case "1":
+                        registro();
+                        break;
+                    case "2":
+                        menu();
+                        break;
+                    default:
+                        System.out.println("Opcion no valida. Selecciona del 1 al 2.");
+                }
+
+            } while (!registrado);
+        }
+        comprobar_bloqueo();
         do {
             System.out.println("=====================================");
             System.out.println("=               LOGIN               =");
             System.out.println("=====================================");
-
             System.out.println("Ingresa tu nombre de usuario:");
-            String usuario = datos.nextLine();
-
+            Scanner nombre = new Scanner(System.in);
+            String usuario = nombre.nextLine();
             System.out.println("Ingresa tu contraseña:");
-            String contrasena_usuario = datos.nextLine();
+            Scanner contrasena = new Scanner(System.in);
+            String contrasena_usuario = contrasena.nextLine().trim();
 
-            captcha_valido = captcha();
+            do {
+                captcha_generado = generar_captcha();
+                System.out.println("CAPTCHA: " + captcha_generado);
+                System.out.println("Inserta el captcha:");
+                Scanner escaner_captcha = new Scanner(System.in);
+                captcha_usuario = escaner_captcha.nextLine().trim();
 
-            if (usuario.equals(usuario_registrado) && contrasena_usuario.equals(contrasena_registrada1) && captcha_valido) {
-                System.out.println("Login Correcto." + "\n ¡Bienvenido " + usuario + "!");
-                System.out.println("\t   **     **  ");
-                System.out.println("\t *****   *****");
-                System.out.println("\t *************");
-                System.out.println("\t  *********** ");
-                System.out.println("\t   *********  ");
-                System.out.println("\t    *******   ");
-                System.out.println("\t     *****    ");
-                System.out.println("\t      ***     ");
-                System.out.println("\t       *      ");
-                logincorrecto = true;
-                // elimina los datos del captcha
-                captcha_valido = false;
-            } else {
-                if (!captcha_valido) {
-                    System.out.println("ERROR. El captcha no es correcto.");
-                    intentos_login = 3;
+                if (!validar_captcha(captcha_generado, captcha_usuario)) {
+                    System.out.println("Captcha incorrecto");
+                    intentos_captcha++;
                 } else {
-                    intentos_login++;
-                    System.out.println("ERROR. Usuario o contraseña incorrectos.\n" +
-                            "(Asegurate que los datos sean correctos antes de introducilos).\n" +
-                            "¡Intento " + intentos_login + " de 3!");
+                    registrado = true;
                 }
 
-            }
-        } while (intentos_login < 3 && !logincorrecto);
+                if (intentos_captcha == 3) {
+                    System.out.println("\n\t Has fallado 3 veces completando el captcha, ¿eres un bot?.\n USUARIO BLOQUEADO");
+                    bloqueado = true;
+                    menu();
+                }
 
-        if (!logincorrecto) {
-            System.out.println("\t HAS FALLADO 3 VECES, ¿DE VERDAD?...." + "\n\t A LA PUTA CALLE BOT.");
+            } while (!validar_captcha(captcha_generado, captcha_usuario));
+
+            if (usuario.equalsIgnoreCase(usuario_registrado) && contrasena_usuario.equals(contrasena_registrada1)) {
+                System.out.println("Login Correcto." + "\n ¡Bienvenido " + usuario + "!");
+                System.out.println("\t    **     **  ");
+                System.out.println("\t  *****   *****");
+                System.out.println("\t  *************");
+                System.out.println("\t   *********** ");
+                System.out.println("\t    *********  ");
+                System.out.println("\t     *******   ");
+                System.out.println("\t      *****    ");
+                System.out.println("\t       ***     ");
+                System.out.println("\t        *      ");
+                login_correcto = true;
+            } else {
+                intentos_login++;
+                System.out.println("ERROR. Usuario o contraseña incorrectos.\n"
+                        + "(Asegurate que los datos sean correctos antes de introducilos)");
+            }
+
+        } while (intentos_login < 3 && !login_correcto);
+
+        if (!login_correcto) {
+            System.out.println("\n\t HAS FALLADO 3 VECES, ¿DE VERDAD?...\n USUARIO BLOQUEADO");
             bloqueado = true;
-            recuperacion();
+            menu();
         }
     }
 
     public static void registro() {
-
         comprobar_bloqueo();
-        boolean registro_correcto = false;
+        int captcha_generado;
+        String captcha_usuario;
+        int intentos = 0;
+
+        System.out.println("=====================================");
+        System.out.println("=             REGISTRO              =");
+        System.out.println("=====================================");
+
         do {
-            System.out.println("=====================================");
-            System.out.println("=             REGISTRO              =");
-            System.out.println("=====================================");
-            System.out.println("Introduce tu USUARIO:");
+            System.out.println("Introduce tu USUARIO (mínimo 5 caracteres):");
             Scanner escaner_usuario = new Scanner(System.in);
             usuario_registrado = escaner_usuario.nextLine();
+            if (!(usuario_registrado.length() >= 5)) {
+                System.out.println("El nombre de usuario debe tener 5 de caracteres");
+            }
+        } while (!validar_nombre(usuario_registrado) || !(usuario_registrado.length() >= 5));
+
+        do {
             System.out.println("Introduce tu NOMBRE:");
             Scanner escaner_nombre = new Scanner(System.in);
             nombre_registrado = escaner_nombre.nextLine();
+        } while (!validar_nombre(nombre_registrado));
+
+        do {
             System.out.println("Introduce tu APELLIDO:");
             Scanner escaner_apellido = new Scanner(System.in);
             apellido_registrado = escaner_apellido.nextLine();
+        } while (!validar_nombre(apellido_registrado));
+
+        do {
             System.out.println("Introduce tu EMAIL:");
             Scanner escaner_email = new Scanner(System.in);
             email_registrado = escaner_email.nextLine();
+        } while (!validar_email(email_registrado));
+
+        do {
             System.out.println("Introduce tu DNI:");
             Scanner escaner_dni = new Scanner(System.in);
-            dni_registrado = escaner_dni.nextLine();
-            System.out.println("Introduce tu FECHA DE NACIMIENTO:");
-            Scanner escaner_fecha_nacimiento = new Scanner(System.in);
-            fecha_registrada = escaner_fecha_nacimiento.nextLine();
+            dni_registrado = escaner_dni.nextLine().toUpperCase();
+        } while (!validar_dni(dni_registrado));
 
-            //Vamos a proceder a comparar la contraseña un maximo de 3 veces.
-            do {
-                System.out.println("Introduce una Contraseña:");
-                Scanner escaner_contrasena1 = new Scanner(System.in);
-                contrasena_registrada1 = escaner_contrasena1.nextLine();
-                System.out.println("Repite la Contraseña:");
-                Scanner escaner_contrasena2 = new Scanner(System.in);
-                contrasena_registrada2 = escaner_contrasena2.nextLine();
+        boolean fecha_valida;
+        do {
+            fecha_valida = registrar_fecha();
+        } while (!fecha_valida);
 
-                if (!contrasena_registrada1.equals(contrasena_registrada2)) {
-                    System.out.println("Las contraseñas no coinciden.");
-                }
+        registrar_contrasena();
 
-            } while (!contrasena_registrada1.equals(contrasena_registrada2));
+        boolean color_validado = false;
 
-            System.out.println("\t=== Para tu seguridad se te va a hacer una pregunta a modo de recuperacion de contraseña ===\n" +
-                    "\t                               ¿CUAL ES TU COLOR FAVORITO?\n");
+        do {
+            System.out.println("\t=== Para tu seguridad se te va a hacer una pregunta a modo de recuperacion de contraseña ===\n"
+                    + "\t                               ¿CUAL ES TU COLOR FAVORITO?\n");
             Scanner escaner_respuesta_seguridad = new Scanner(System.in);
-            respuesta_seguridad1 = escaner_respuesta_seguridad.nextLine();
+            respuesta_seguridad = escaner_respuesta_seguridad.nextLine();
 
-            captcha_valido = captcha();
+            if (respuesta_seguridad.length() == 0) {
+                System.out.println("Valor incorrecto,  el campo no debe estar vacío.");
 
-            if (captcha_valido) {
-                registro_correcto = true;
+            } else {
+                for (int i = 0; i < respuesta_seguridad.length(); i++) {
+                    if (!es_letra(respuesta_seguridad.charAt(i))) {
+                        color_validado = false;
+                        System.out.println("Valor incorrecto,  inserta solo letras.");
+                        break;
+                    }
+                    color_validado = true;
+                }
             }
 
-        } while (!registro_correcto);
+        } while (!color_validado);
 
+        do {
+            captcha_generado = generar_captcha();
+            System.out.println("CAPTCHA: " + captcha_generado);
+            System.out.println("Inserta el captcha:");
+            Scanner escaner_captcha = new Scanner(System.in);
+            captcha_usuario = escaner_captcha.nextLine().trim();
+
+            if (!validar_captcha(captcha_generado, captcha_usuario)) {
+                System.out.println("Captcha incorrecto");
+                intentos++;
+            } else {
+                System.out.println("USUARIO REGISTRADO!");
+                registrado = true;
+            }
+
+            if (intentos == 3) {
+                System.out.println("\n\t Has fallado 3 veces completando el captcha, eres un bot?.");
+                break;
+            }
+
+        } while (!validar_captcha(captcha_generado, captcha_usuario));
     }
 
-    public static void recuperacion() {
+    public static void recuperacion(boolean recuperar_contrasena) {
+        Scanner scanner = new Scanner(System.in);
 
-        if (nombre_registrado == null || contrasena_registrada1 == null) {
-            System.out.println("\t ¡¡ME LO QUERIAS REVENTAR EEEHHH, LISTO!!." + " \t Anda... Regístrate Primero.\n" + "\t Pulsa el numero 2 de tu teclado.");
-            return;
-        }
-        System.out.println("=====================================");
-        System.out.println("     RECUPERACIÓN DE CONTRASEÑA      ");
-        System.out.println("=====================================");
-        System.out.println("  Pregunta de Seguridad: " + "\t ¿Cual es tu color favorito?\n ");
-        Scanner escaner_respuesta_seguridad2 = new Scanner(System.in);
-        respuesta_seguridad2 = escaner_respuesta_seguridad2.nextLine();
-        if (respuesta_seguridad1.equals(respuesta_seguridad2)) {
-            System.out.println("Login Correcto." + "\t¡Bienvenido " + nombre_registrado + "!\n");
-            bloqueado = false;
+        if (registrado && (bloqueado || recuperar_contrasena)) {
+
+            System.out.println("=====================================");
+            System.out.println("     COMPROBACIÓN DE SEGURIDAD       ");
+            System.out.println("=====================================");
+
+            System.out.print("Introduce nombre de usuario: ");
+            String nombre_usuario = scanner.nextLine().trim();
+            System.out.print("Pregunta de Seguridad: ¿Cuál es tu color favorito? ");
+            String respuesta_usuario = scanner.nextLine().trim();
+
+
+            if (respuesta_seguridad.equalsIgnoreCase(respuesta_usuario) && nombre_usuario.equalsIgnoreCase(usuario_registrado)) {
+                System.out.println("\t******** RESPUESTA CORRECTA ********");
+
+                if (bloqueado) {
+                    bloqueado = false;
+                }
+
+                if (recuperar_contrasena) {
+                    registrar_contrasena();
+                }
+            } else {
+                System.out.println("\t******* RESPUESTA INCORRECTA ******.");
+                menu();
+            }
         } else {
-            System.out.println("\t******* RESPUESTA INCORRECTA ******.");
+            System.out.println("No hay usuarios registrados o bloqueados.");
         }
+    }
+
+    public static void registrar_contrasena() {
+        String contrasena_registrada2;
+        do {
+            System.out.println("Introduce una Contraseña (con may, min, numero y caracter especial):");
+            Scanner escaner_contrasena1 = new Scanner(System.in);
+            contrasena_registrada1 = escaner_contrasena1.nextLine().trim();
+
+            System.out.println("Repite la Contraseña:");
+            Scanner escaner_contrasena2 = new Scanner(System.in);
+            contrasena_registrada2 = escaner_contrasena2.nextLine().trim();
+
+            if (!contrasena_registrada1.equals(contrasena_registrada2)) {
+                System.out.println("Las contraseñas no coinciden. Intenta de nuevo.");
+            }
+
+            if (!validar_contrasena(contrasena_registrada1)) {
+                System.out.println("Contraseña no válida.");
+            }
+
+        } while (!contrasena_registrada1.equals(contrasena_registrada2) || !validar_contrasena(contrasena_registrada1));
     }
 
     public static void comprobar_bloqueo() {
         if (bloqueado) {
-            System.out.println("Usuario bloqueado");
-            recuperacion();
+            System.out.println("Usuario BLOQUEADO");
+            recuperacion(false);
         }
     }
 
-    public static boolean captcha() {
-        int intentos_captcha = 0;
-        do {
-            int captcha_generado = 1000 + (int) (Math.random() * 9000);
-            System.out.println("Introduce el número generado:\n" + captcha_generado);
-            Scanner scanner_captcha = new Scanner(System.in);
-            String captcha_usuario = scanner_captcha.nextLine();
-            if (captcha_usuario.equals(String.valueOf(captcha_generado))) {
-                captcha_valido = true;
-            } else {
-                System.out.println("Captcha incorrecto");
-                intentos_captcha++;
-            }
-
-        } while (!captcha_valido || intentos_captcha > 3);
-
-        if (captcha_valido) {
-            return true;
-        }
-        return false;
+    // modificamos el valor a entero
+    public static int generar_captcha() {
+        return 1000 + (int) (Math.random() * 9000);
     }
 
-
-    public static boolean validar_usuario(String usuario) {
-        if (usuario.length() < 8) {
+    public static boolean validar_captcha(int captcha_generado, String captcha_usuario) {
+        if (!captcha_usuario.equals(String.valueOf(captcha_generado))) {
             return false;
         }
-
-        boolean char_valido = true;
-        for (int i = 0; i < usuario.length(); i++) {
-            char c = usuario.charAt(i);
-            if (!(c >= 'A' && c <= 'Z') && !(c >= 'a' && c <= 'z') &&
-                    !(c == 'á' || c == 'é' || c == 'í' || c == 'ó' || c == 'ú' ||
-                            c == 'Á' || c == 'É' || c == 'Í' || c == 'Ó' || c == 'Ú' ||
-                            c == 'ñ' || c == 'Ñ' || c == 'ü' || c == 'ç')) {
-                char_valido = false;
-            }
-        }
-        if (char_valido) {
-            return true;
-        }
-        return false;
-    }
-
-
-    public static boolean validar_email(String email) {
         return true;
     }
 
-    public static boolean validar_dni(String dni) {
+    public static boolean validar_email(String email) {
+        int arroba = email.indexOf('@');
+
+        // si devuelve -1, no encuentra el caracter
+        if (arroba == -1 || arroba == 0) {
+            System.out.println("Email no válido");
+            return false;
+        }
+
+        // Comprobamos que el punto este despues de la arroba
+        int punto = email.indexOf('.', arroba);
+        if (punto == -1) {
+            System.out.println("Email no válido");
+            return false;
+        }
+
+        int tamano = email.length();
+        // comprobamos que el email termine en letra
+        if (!es_letra(email.charAt(tamano - 1))) {
+            System.out.println("Email no válido");
+            return false;
+        }
         return true;
     }
 
     public static boolean validar_contrasena(String contrasena) {
-
         if (contrasena.length() < 8) {
             return false;
         }
 
-        boolean tiene_mayuscula = false;
-        boolean tiene_minuscula = false;
-        boolean tiene_numero = false;
-        boolean tiene_especial = false;
+        boolean tieneMayuscula = false;
+        boolean tieneMinuscula = false;
+        boolean tieneNumero = false;
+        boolean tieneEspecial = false;
 
         for (int i = 0; i < contrasena.length(); i++) {
             char c = contrasena.charAt(i);
-
             if (c >= 'A' && c <= 'Z') {
-                tiene_mayuscula = true;
+                tieneMayuscula = true;
             } else if (c >= 'a' && c <= 'z') {
-                tiene_minuscula = true;
-            } else if (c >= '0' && c <= '9') {
-                tiene_numero = true;
+                tieneMinuscula = true;
+            } else if (es_numero(c)) {
+                tieneNumero = true;
             } else {
-                tiene_especial = true;
+                tieneEspecial = true;
             }
-
-            if (tiene_mayuscula && tiene_minuscula && tiene_numero && tiene_especial) {
+            if (tieneMayuscula && tieneMinuscula && tieneNumero && tieneEspecial) {
                 return true;
             }
-
         }
         return false;
     }
 
-    public static void fecha_valida() {
+    public static boolean validar_nombre(String nombre) {
+        nombre = nombre.toLowerCase();
+
+        for (int i = 0; i < nombre.length(); i++) {
+            char letra = nombre.charAt(i);
+
+            // Si algún booleano es false
+            if (!es_letra(letra) && !es_acento(letra) && letra != ' ') {
+                System.out.println("Nombre no válido, debe contener solo letras");
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public static boolean registrar_fecha() {
         Scanner entrada_fecha = new Scanner(System.in);
-        int dia, mes, ano;
-        String diaStr, mesStr, anoStr;
-        boolean validar_fecha = false;
-        boolean validador;
-        boolean menor_edad = false;
+        int dia = 0, mes = 0, ano = 0;
+        String dia_str, mes_str, ano_str;
+        boolean validador = false;
+
+        System.out.println("Introduce tu fecha de nacimiento:");
 
         do {
-            System.out.println("Introduce tu fecha de nacimiento:");
-            validador = false;
-            do {
-                System.out.print("Introduce el dia : ");
-                diaStr = entrada_fecha.nextLine();
-                for (int i = 0; i < diaStr.length(); i++) {
-                    char c = diaStr.charAt(i);
-                    if (c >= '0' && c <= '9') {
-                        validador = true;
-                    } else {
-                        System.out.println("Error, introduce un valor correcto");
-                        validador = false;
-                    }
-                }
-            } while (!validador);
-            dia = Integer.parseInt(diaStr);
-            validador = false;
-
-            do {
-                System.out.print("Introduce el mes: ");
-                mesStr = entrada_fecha.nextLine();
-                for (int i = 0; i < mesStr.length(); i++) {
-                    char c = mesStr.charAt(i);
-
-                    if (c >= '0' && c <= '9') {
-                        validador = true;
-                    } else {
-                        System.out.println("Error, introduce un valor correcto");
-                        validador = false;
-                    }
-                }
-            } while (!validador);
-            mes = Integer.parseInt(mesStr);
-            validador = false;
-            do {
-                System.out.print("Introduce el año: ");
-                anoStr = entrada_fecha.nextLine();
-                for (int i = 0; i < mesStr.length(); i++) {
-                    char c = mesStr.charAt(i);
-
-                    if (c >= '0' && c <= '9') {
-                        validador = true;
-                    } else {
-                        System.out.println("Error, introduce un valor correcto");
-                        validador = false;
-                    }
-                }
-            } while (!validador);
-            ano = Integer.parseInt(anoStr);
-            validador = mes >= 1 && mes <= 12;
-            int dias_mes = 0;
-            if (validador) {
-                switch (mes) {
-                    case 1:
-                    case 3:
-                    case 5:
-                    case 7:
-                    case 8:
-                    case 10:
-                    case 12 :
-                        dias_mes = 31;
-                        break;
-                    case 4:
-                    case 6:
-                    case 9:
-                    case 11:
-                        dias_mes = 30;
-                        break;
-                    case 2:
-                        if ((ano % 4 == 0 && ano % 100 != 0) || (ano % 400 == 0)) {
-                            dias_mes = 29;
-                        } else {
-                            dias_mes = 28;
-                        }
-                        break;
-                    default:
-                        System.out.println("Error");
-                        break;
-
-                }
-
-                if (dia < 1 || dia > dias_mes) {
+            System.out.print("Introduce el día: ");
+            dia_str = entrada_fecha.nextLine();
+            for (int i = 0; i < dia_str.length(); i++) {
+                char letra = dia_str.charAt(i);
+                if (!es_numero(letra)) {
                     validador = false;
+                    System.out.println("Valor INCORRECTO,  inserta solo números.");
+                    break;
                 }
+                validador = true;
             }
-            if (ano > 2006 || (ano == 2006 && mes > 11) || (ano == 2006 && mes == 11 && dia > 0)) {
-                System.out.println("Eres menor de edad. No puedes registrarte");
-                menor_edad = true;
-                validador = false;
+            if (validador) {
+                dia = Integer.parseInt(dia_str);
             }
-            if (validador && !menor_edad) {
-                validar_fecha = true;
-                System.out.println("Fecha valida");
-            } else {
-                System.out.println("La fecha no es válida.");
+        } while (!validador);
+        do {
+
+            System.out.print("Introduce el mes: ");
+            mes_str = entrada_fecha.nextLine();
+            for (int i = 0; i < mes_str.length(); i++) {
+                char letra = mes_str.charAt(i);
+                if (!es_numero(letra)) {
+                    validador = false;
+                    System.out.println("Valor INCORRECTO,  inserta solo números.");
+                    break;
+                }
+                validador = true;
             }
-        } while (!validar_fecha);
+            if (validador) {
+                mes = Integer.parseInt(mes_str);
+            }
+        } while (!validador);
+        do {
+            System.out.print("Introduce el año: ");
+            ano_str = entrada_fecha.nextLine();
+            for (int i = 0; i < ano_str.length(); i++) {
+                char letra = ano_str.charAt(i);
+                if (!es_numero(letra)) {
+                    validador = false;
+                    System.out.println("Valor INCORRECTO,  inserta solo números.");
+                    break;
+                }
+                validador = true;
+            }
+            if (validador) {
+                ano = Integer.parseInt(ano_str);
+            }
+        } while (!validador);
+
+        // Validamos mes
+        int dias_mes = 0;
+
+        switch (mes) {
+            case 1:
+            case 3:
+            case 5:
+            case 7:
+            case 8:
+            case 10:
+            case 12:
+                dias_mes = 31;
+                break;
+            case 4:
+            case 6:
+            case 9:
+            case 11:
+                dias_mes = 30;
+                break;
+            case 2:
+                if ((ano % 4 == 0 && ano % 100 != 0) || (ano % 400 == 0)) {
+                    dias_mes = 29;
+                } else {
+                    dias_mes = 28;
+                }
+                break;
+            default:
+                System.out.println("La fecha NO es válida.");
+                return false;
+        }
+
+        if (dia < 1 || dia > dias_mes) {
+            System.out.println("La fecha NO es válida.");
+            return false;
+        }
+
+        // Verificamos si es menor de edad
+        if (ano > 2006 || (ano == 2006 && mes > 11)) {
+            System.out.println("Eres MENOR de edad. No puedes registrarte");
+            menu();
+        }
+        fecha_registrada = dia_str + "/" + mes_str + "/" + ano_str;
+        System.out.println("Fecha " + fecha_registrada + " validada." );
+        return true;
     }
+
+    // recibe dni del usaurio
+    public static boolean validar_dni(String dni) {
+
+        if (dni.length() != 9) {
+            System.out.println("Documento no válido");
+            return false;
+        }
+
+        // Si es dni, empieza por numero
+        if (es_numero(dni.charAt(0))) {
+            return comprobar_dni(dni);
+            // Si es nie, empieza por letra
+        } else if (es_letra(dni.charAt(0))) {
+            return comprobar_nie(dni);
+        } else {
+            System.out.println("Documento NO válido");
+        }
+        return false;
+    }
+
+    private static boolean comprobar_dni(String dni) {
+        for (int i = 0; i < 8; i++) {
+            if (!es_numero(dni.charAt(i))) {
+                System.out.println("Documento NO válido");
+                return false;
+            }
+        }
+        return es_letra(dni.charAt(8));
+    }
+
+    private static boolean comprobar_nie(String nie) {
+        for (int i = 1; i <= 7; i++) {
+            if (!es_numero(nie.charAt(i))) {
+                System.out.println("Documento NO válido");
+                return false;
+            }
+        }
+        return es_letra(nie.charAt(8));
+    }
+
+    private static boolean es_numero(char letra) {
+        return letra >= '0' && letra <= '9';
+    }
+
+    // Cromprueba que el valor sea una letra
+    private static boolean es_letra(char letra) {
+        return (letra >= 'A' && letra <= 'Z') || (letra >= 'a' && letra <= 'z');
+    }
+
+    // Comprueba que el valor sea una letra acentuada
+    private static boolean es_acento(char letra) {
+        return letra == 'á' || letra == 'é' || letra == 'í' || letra == 'ó' || letra == 'ú' || letra == 'ç'
+                || letra == 'Ç' || letra == 'Á' || letra == 'É' || letra == 'Í' || letra == 'Ó' || letra == 'Ú'
+                || letra == 'ñ' || letra == 'Ñ' || letra == 'ü' || letra == 'Ü';
+    }
+
 }
